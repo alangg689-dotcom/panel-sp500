@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b0f17">
+<title>Panel de Mercado · S&amp;P 500 para principiantes</title>
+<style>
+  :root{
+    --bg:#0b0f17; --panel:#121826; --panel2:#182033; --line:#243049;
+    --txt:#e6ebf5; --muted:#9aa6bf; --acc:#3fa9ff; --ok:#22c55e; --bad:#ef4444; --warn:#f5b301;
+    --r:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  a{color:var(--acc)}
+  header.top{background:var(--bg)}
+  .brand{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:10px 14px 6px;flex-wrap:wrap}
+  .brand h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.2px}
+  .brand h1 span{color:var(--acc)}
+  .mkt{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--muted);display:inline-block}
+  .dot.open{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+  .dot.closed{background:var(--bad)}
+  #tape{min-height:62px}
+  nav.tabs{position:sticky;top:0;z-index:20;background:rgba(11,15,23,.97);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;padding:8px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  nav.tabs::-webkit-scrollbar{display:none}
+  nav.tabs button{flex:0 0 auto;background:var(--panel);color:var(--txt);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:14px;cursor:pointer;white-space:nowrap}
+  nav.tabs button.active{background:var(--acc);border-color:var(--acc);color:#04111f;font-weight:700}
+  .disclaimer{margin:10px 12px 0;padding:10px 12px;border:1px solid #5c4708;background:#2a2105;color:#ffe08a;border-radius:var(--r);font-size:13.5px}
+  .disclaimer b{color:#ffd24d}
+  main{padding:10px 12px 30px;max-width:1500px;margin:0 auto}
+  section.tab{display:none}
+  section.tab.active{display:block}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:12px}
+  .card h2{font-size:16px;margin:0 0 6px}
+  .card h3{font-size:15px;margin:14px 0 4px;color:var(--acc)}
+  .hint{color:var(--muted);font-size:13.5px;margin:0 0 8px}
+  .symbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .symbar form{display:flex;gap:6px;flex:1 1 260px}
+  .symbar input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:9px 11px;font-size:16px;text-transform:uppercase}
+  .symbar button,.chip{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:8px 11px;font-size:14px;cursor:pointer}
+  .symbar button[type=submit]{background:var(--acc);color:#04111f;border-color:var(--acc);font-weight:700}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip.on{border-color:var(--acc);color:var(--acc)}
+  .cur{font-size:13.5px;color:var(--muted)} .cur b{color:var(--txt)}
+  .grid{display:grid;gap:12px;grid-template-columns:minmax(0,1fr) 380px}
+  .w{position:relative;width:100%;border-radius:10px;overflow:hidden;background:var(--panel2)}
+  .w .tradingview-widget-container,.w .tradingview-widget-container__widget{height:100%;width:100%}
+  .h-chart{height:72vh;min-height:520px}
+  .h-ta{height:460px}
+  .h-xl{height:650px}
+  .h-l{height:560px}
+  .h-info{height:300px}
+  #w-info2{height:215px}
+  .h-prof{height:420px}
+  .h-fin{height:620px}
+  .twocol{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:8px}
+  .seg button{background:var(--panel2);color:var(--txt);border:0;padding:7px 12px;cursor:pointer;font-size:14px}
+  .seg button.on{background:var(--acc);color:#04111f;font-weight:700}
+  .guide p,.guide li{color:#d4dbea}
+  .guide ul{padding-left:20px;margin:4px 0}
+  .tbl{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}
+  .tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+  .tbl th{background:var(--panel2)}
+  .pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;border:1px solid var(--line);color:var(--muted)}
+  footer{color:var(--muted);font-size:12.5px;text-align:center;padding:16px 12px 30px;border-top:1px solid var(--line)}
+  @media (max-width:1000px){ .grid,.twocol{grid-template-columns:1fr} }
+  @media (max-width:600px){
+    html,body{font-size:14.5px}
+    .h-chart{height:68vh;min-height:430px}
+    .h-xl{height:560px} .h-l{height:520px} .h-fin{height:560px}
+    main{padding:8px 8px 24px}
+    .card{padding:10px}
+    #w-info2{height:300px}
+    .disclaimer{font-size:12.5px;padding:8px 10px;margin:8px 8px 0}
+    .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+    .chips::-webkit-scrollbar{display:none}
+    .chip{flex:0 0 auto}
+    .symhint,.cur{display:none}
+    .card .hint{font-size:12.5px}
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <h1>📈 Panel de Mercado <span>S&amp;P 500</span></h1>
+    <div class="mkt"><span id="mktDot" class="dot"></span><span id="mktTxt">Calculando horario…</span></div>
+  </div>
+  <!-- 1) Cinta de cotizaciones -->
+  <div id="tape" role="region" aria-label="Cinta de cotizaciones"></div>
+</header>
+  <nav class="tabs" role="tablist" aria-label="Secciones">
+    <button type="button" data-tab="grafica" class="active">Gráfica</button>
+    <button type="button" data-tab="mapa">Mapa S&amp;P 500</button>
+    <button type="button" data-tab="movimientos">Movimientos</button>
+    <button type="button" data-tab="screener">Screener</button>
+    <button type="button" data-tab="calendario">Calendario</button>
+    <button type="button" data-tab="noticias">Noticias</button>
+    <button type="button" data-tab="perfil">Perfil y fundamentales</button>
+    <button type="button" data-tab="aprende">Cómo leer esto</button>
+  </nav>
+
+<div class="disclaimer" role="note">
+  <b>⚠️ Herramienta educativa.</b> Los datos vienen de TradingView y pueden tener <b>retraso</b> (en acciones de EE. UU. suele ser de minutos). Esto <b>no es asesoría financiera ni una recomendación de compra o venta</b>. El trading de corto plazo es muy riesgoso y la mayoría de los principiantes pierde dinero. Para comprar, usa tu casa de bolsa regulada (p. ej. GBM).
+</div>
+
+<main>
+  <!-- Barra de símbolo (compartida) -->
+  <div class="card" id="symCard">
+    <div class="symbar">
+      <form id="symForm" autocomplete="off">
+        <input type="text" id="symInput" list="symList" placeholder="Símbolo, p. ej. VOO, AAPL, NASDAQ:MSFT" aria-label="Símbolo">
+        <button type="submit">Ver</button>
+      </form>
+      <div class="cur">Símbolo actual: <b id="curSym">AMEX:VOO</b></div>
+    </div>
+    <datalist id="symList"></datalist>
+    <div class="chips" id="chips" style="margin-top:8px"></div>
+    <p class="hint symhint" style="margin:8px 0 0">Al cambiar el símbolo aquí se actualizan la gráfica, el análisis técnico, el perfil y los fundamentales. (Si cambias el símbolo <i>dentro</i> de la gráfica, solo cambia la gráfica.)</p>
+  </div>
+
+  <!-- 2) y 3) Gráfica + Análisis técnico -->
+  <section class="tab active" id="tab-grafica">
+    <div class="grid">
+      <div class="card">
+        <h2>Gráfica avanzada</h2>
+        <p class="hint">Velas diarias con media móvil de 50 y 200, volumen, RSI y MACD. Puedes cambiar temporalidad (1D, 1S…) arriba de la gráfica. Horario: el de la bolsa (Nueva York).</p>
+        <div class="w h-chart" id="w-chart"></div>
+      </div>
+      <div>
+        <div class="card">
+          <h2>Análisis técnico (resumen)</h2>
+          <p class="hint">Resume osciladores y medias móviles en “Venta fuerte … Compra fuerte”. Es un conteo automático de indicadores, <b>no una predicción</b>.</p>
+          <div class="w h-ta" id="w-ta"></div>
+        </div>
+        <div class="card">
+          <h2>Datos rápidos</h2>
+          <div class="w h-info" id="w-info1"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4) Mapa de calor -->
+  <section class="tab" id="tab-mapa">
+    <div class="card">
+      <h2>Mapa de calor del S&amp;P 500</h2>
+      <p class="hint">Cada cuadro es una empresa; el tamaño es su valor de mercado y el color, cuánto sube (verde) o baja (rojo) hoy. Agrupado por sector. Toca un cuadro para ver detalles.</p>
+      <div class="w h-xl" id="w-heat"></div>
+    </div>
+  </section>
+
+  <!-- 5) Movimientos -->
+  <section class="tab" id="tab-movimientos">
+    <div class="card">
+      <h2>Movimientos del mercado (EE. UU.)</h2>
+      <p class="hint">Las que más suben, más bajan y más se operan. Ojo: lo que más sube hoy suele ser lo más volátil; no es una lista de “compras”.</p>
+      <div class="w h-xl" id="w-hot"></div>
+    </div>
+  </section>
+
+  <!-- 6) Screener -->
+  <section class="tab" id="tab-screener">
+    <div class="card">
+      <h2>Screener de acciones (EE. UU.)</h2>
+      <p class="hint">Filtra y ordena acciones por precio, cambio, volumen, P/E, dividendos y más. Usa las pestañas de arriba del widget (Resumen, Rendimiento, Valuación, Dividendos, Técnico…).</p>
+      <div class="w h-xl" id="w-screen"></div>
+    </div>
+  </section>
+
+  <!-- 7) Calendario -->
+  <section class="tab" id="tab-calendario">
+    <div class="card">
+      <h2>Calendario económico (EE. UU. y México)</h2>
+      <p class="hint">Datos como inflación (CPI), empleo, decisiones de tasas de la Fed y Banxico. Los eventos de alta importancia suelen mover el mercado y el tipo de cambio.</p>
+      <div class="seg" id="calSeg"><button type="button" data-c="us,mx" class="on">EE. UU. + México</button><button type="button" data-c="us">EE. UU.</button><button type="button" data-c="mx">México</button></div>
+      <div class="w h-l" id="w-cal"></div>
+    </div>
+  </section>
+
+  <!-- 8) Noticias -->
+  <section class="tab" id="tab-noticias">
+    <div class="card">
+      <h2>Noticias</h2>
+      <p class="hint">Titulares recientes. Una noticia no es una señal de compra: muchas ya están “descontadas” en el precio cuando las lees.</p>
+      <div class="seg" id="newsSeg"><button type="button" data-m="all" class="on">Mercado</button><button type="button" data-m="sym">Símbolo actual</button></div>
+      <div class="w h-xl" id="w-news"></div>
+    </div>
+  </section>
+
+  <!-- 9) Perfil / fundamentales -->
+  <section class="tab" id="tab-perfil">
+    <div class="card">
+      <h2>Información del símbolo</h2>
+      <div class="w h-info" id="w-info2"></div>
+    </div>
+    <div class="twocol">
+      <div class="card">
+        <h2>Perfil de la empresa / fondo</h2>
+        <div class="w h-prof" id="w-prof"></div>
+      </div>
+      <div class="card">
+        <h2>Datos fundamentales</h2>
+        <p class="hint">Para ETFs (VOO, IVV, SPY) esta parte puede salir vacía, porque un ETF no tiene “estados financieros” como una empresa. Prueba con AAPL o MSFT.</p>
+        <div class="w h-fin" id="w-fin"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10) Guía -->
+  <section class="tab" id="tab-aprende">
+    <div class="card guide">
+      <h2>Cómo leer esto (guía para principiantes)</h2>
+      <div class="disclaimer" style="margin:6px 0 10px">Ningún indicador predice el futuro. Sirven para entender qué está pasando y tomar decisiones con calma. Para un plan de largo plazo con ETF del S&amp;P 500, lo más importante es la <b>constancia</b> (aportar cada mes) y no vender por pánico.</div>
+
+      <h3>🕯️ Velas japonesas</h3>
+      <p>Cada vela es un periodo (un día en la gráfica diaria). <b>Verde</b>: cerró más arriba de donde abrió. <b>Roja</b>: cerró más abajo. El cuerpo va de la apertura al cierre y las “mechas” marcan el máximo y mínimo del periodo.</p>
+
+      <h3>📐 Tendencia, soporte y resistencia</h3>
+      <ul>
+        <li><b>Tendencia alcista</b>: máximos y mínimos cada vez más altos. <b>Bajista</b>: cada vez más bajos.</li>
+        <li><b>Soporte</b>: zona donde el precio ha dejado de caer varias veces. <b>Resistencia</b>: zona donde ha dejado de subir.</li>
+        <li>En computadora puedes dibujar líneas con las herramientas de la gráfica (iconos de la izquierda; en celular se ocultan para dar más espacio).</li>
+      </ul>
+
+      <h3>〰️ Medias móviles (MA 50 y MA 200)</h3>
+      <ul>
+        <li>Son el precio promedio de los últimos 50 o 200 días; suavizan el “ruido”.</li>
+        <li>Precio <b>arriba</b> de la MA 200 → tendencia de largo plazo positiva; <b>abajo</b> → más débil.</li>
+        <li><b>Cruce dorado</b>: la MA 50 cruza hacia arriba la MA 200 (señal alcista común). <b>Cruce de la muerte</b>: la cruza hacia abajo.</li>
+        <li>Límite: van <b>atrasadas</b>; confirman lo que ya pasó.</li>
+      </ul>
+
+      <h3>📊 Volumen</h3>
+      <p>Cuántas acciones se operaron. Un movimiento con volumen alto tiene más “convicción” que uno con volumen bajo.</p>
+
+      <h3>🌡️ RSI (Índice de Fuerza Relativa)</h3>
+      <ul>
+        <li>Va de 0 a 100. Arriba de <b>70</b> se dice “sobrecomprado”; debajo de <b>30</b>, “sobrevendido”.</li>
+        <li>Límite: en tendencias fuertes puede quedarse arriba de 70 (o abajo de 30) mucho tiempo. No es señal automática.</li>
+      </ul>
+
+      <h3>📉 MACD</h3>
+      <ul>
+        <li>Compara dos medias móviles. Tiene la línea MACD, la línea de señal y un histograma.</li>
+        <li>MACD cruza <b>arriba</b> de la señal → impulso alcista; cruza <b>abajo</b> → impulso bajista. Histograma creciendo = el impulso se fortalece.</li>
+        <li>Límite: da muchas señales falsas cuando el precio va de lado.</li>
+      </ul>
+
+      <h3>🎯 Resumen de análisis técnico</h3>
+      <p>El medidor cuenta cuántos indicadores dicen “compra”, “venta” o “neutral” en la temporalidad elegida. Cambia muy seguido y en temporalidades cortas (1 min, 15 min) es casi ruido. Úsalo como termómetro, no como orden.</p>
+
+      <h3>🧱 Mapa de calor, movimientos y screener</h3>
+      <ul>
+        <li><b>Mapa</b>: en un vistazo ves qué sectores mandan hoy. Las empresas grandes (Apple, Microsoft, Nvidia…) pesan más en el S&amp;P 500.</li>
+        <li><b>Movimientos</b>: lo que más sube o baja suele tener noticias o mucho riesgo detrás.</li>
+        <li><b>Screener</b>: filtra por <b>P/E</b> (precio/utilidad; alto = el mercado espera mucho crecimiento o está caro), capitalización, dividendos, etc.</li>
+      </ul>
+
+      <h3>🏢 Fundamentales (para acciones)</h3>
+      <table class="tbl">
+        <thead><tr><th>Dato</th><th>Qué significa</th></tr></thead><tbody>
+        <tr><td>Capitalización</td><td>Cuánto vale la empresa en bolsa (precio × acciones).</td></tr>
+        <tr><td>P/E (PER)</td><td>Cuántos años de utilidades pagas al precio actual. Compara contra empresas del mismo sector.</td></tr>
+        <tr><td>EPS / UPA</td><td>Utilidad por acción.</td></tr>
+        <tr><td>Margen neto</td><td>De cada $100 que vende, cuánto le queda de ganancia.</td></tr>
+        <tr><td>Deuda / capital</td><td>Qué tan endeudada está.</td></tr>
+        <tr><td>Rendimiento por dividendo</td><td>Dividendo anual entre el precio.</td></tr>
+      </tbody></table>
+
+      <h3>🇲🇽 Ojo si inviertes desde México</h3>
+      <ul>
+        <li>VOO, IVV y SPY cotizan en dólares; en el SIC (GBM Trading MX) los pagas en pesos, así que tu resultado depende también del <b>USD/MXN</b> (está en la cinta de arriba).</li>
+        <li>El precio que ves aquí es el de EE. UU.; el precio en GBM puede variar un poco por tipo de cambio y comisiones.</li>
+        <li>Horario de la bolsa de Nueva York: 9:30 a 16:00 (hora de Nueva York). En hora de Mazatlán es de <b>6:30 a 13:00</b> mientras EE. UU. tiene horario de verano (hasta el 1 de noviembre de 2026) y de <b>7:30 a 14:00</b> después. El indicador de arriba no considera días festivos.</li>
+      </ul>
+
+      <h3>🚧 Límites de este panel</h3>
+      <ul>
+        <li>Los datos pueden tener retraso. Los widgets gratuitos no muestran algunos índices oficiales: el “S&amp;P 500” de la cinta es un CFD que sigue al índice (FOREXCOM:SPXUSD) y el IPC de México no está disponible, así que se usa el ETF <b>EWW</b> (acciones mexicanas en dólares) como referencia.</li>
+        <li>Los indicadores técnicos funcionan mejor como contexto; ninguno garantiza resultados.</li>
+        <li>Corto plazo = más riesgo. Si quieres practicar trading, hazlo primero en simulación (TradingView tiene “Paper Trading”) y nunca con dinero que necesites.</li>
+      </ul>
+
+      <h3>✅ Rutina sugerida (5 minutos al mes)</h3>
+      <ol>
+        <li>Haz tu aportación mensual en GBM, sin importar si el mercado subió o bajó.</li>
+        <li>Mira la gráfica semanal de VOO y si está arriba o abajo de su MA 200, solo para entender el contexto.</li>
+        <li>Revisa el calendario: ¿hubo decisión de tasas o dato de inflación?</li>
+        <li>Anota tu aportación (fecha, monto, precio, comisión) en tu hoja de registro.</li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Gráficas, cotizaciones y noticias: widgets gratuitos de <a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank">TradingView</a>.
+  Herramienta educativa; datos con posible retraso; no es asesoría financiera ni recomendación de inversión.
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var LOCALE = "es";
+  var BASE = "https://s3.tradingview.com/external-embedding/embed-widget-";
+
+  // Atajos de símbolos (alias simple -> símbolo TradingView)
+  var PRESETS = [
+    ["AMEX:VOO","VOO"],["AMEX:IVV","IVV"],["AMEX:SPY","SPY"],["FOREXCOM:SPXUSD","S&P 500"],
+    ["NASDAQ:QQQ","QQQ"],["NASDAQ:AAPL","Apple"],["NASDAQ:MSFT","Microsoft"],["NASDAQ:NVDA","Nvidia"],
+    ["NASDAQ:AMZN","Amazon"],["NASDAQ:GOOGL","Google"],["NASDAQ:META","Meta"],["NASDAQ:TSLA","Tesla"],
+    ["FX_IDC:USDMXN","USD/MXN"],["AMEX:EWW","México (EWW)"]
+  ];
+  var ALIAS = {VOO:"AMEX:VOO",IVV:"AMEX:IVV",SPY:"AMEX:SPY",SPX:"FOREXCOM:SPXUSD","S&P500":"FOREXCOM:SPXUSD",SP500:"FOREXCOM:SPXUSD",EWW:"AMEX:EWW",IPC:"AMEX:EWW",
+    QQQ:"NASDAQ:QQQ",AAPL:"NASDAQ:AAPL",MSFT:"NASDAQ:MSFT",NVDA:"NASDAQ:NVDA",AMZN:"NASDAQ:AMZN",
+    GOOGL:"NASDAQ:GOOGL",GOOG:"NASDAQ:GOOG",META:"NASDAQ:META",TSLA:"NASDAQ:TSLA",USDMXN:"FX_IDC:USDMXN",
+    "USD/MXN":"FX_IDC:USDMXN",HD:"NYSE:HD",JPM:"NYSE:JPM",KO:"NYSE:KO",WMT:"NYSE:WMT",NFLX:"NASDAQ:NFLX",
+    AMD:"NASDAQ:AMD",BRK:"NYSE:BRK.B","BRK.B":"NYSE:BRK.B",V:"NYSE:V",MA:"NYSE:MA",DIS:"NYSE:DIS"};
+
+  function normSym(s){
+    s = (s||"").trim().toUpperCase().replace(/\s+/g,"");
+    if(!s) return null;
+    if(ALIAS[s]) return ALIAS[s];
+    return s; // TradingView suele resolver "AAPL" o "NYSE:KO"
+  }
+
+  // Monta un widget clásico de TradingView en un contenedor
+  function mount(id, name, cfg){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = "";
+    var c = document.createElement("div"); c.className = "tradingview-widget-container";
+    var w = document.createElement("div"); w.className = "tradingview-widget-container__widget";
+    c.appendChild(w);
+    var s = document.createElement("script");
+    s.type = "text/javascript"; s.async = true; s.src = BASE + name + ".js";
+    s.text = JSON.stringify(cfg);
+    c.appendChild(s);
+    el.appendChild(c);
+  }
+
+  // ---------- Estado ----------
+  var params = new URLSearchParams(location.hash.slice(1));
+  var state = {
+    sym: normSym(params.get("s")) || (function(){try{return localStorage.getItem("pm_sym");}catch(e){return null;}})() || "AMEX:VOO",
+    tab: params.get("t") || "grafica",
+    cal: "us,mx", news: "all"
+  };
+  var rendered = {}; // tab -> símbolo con el que se dibujó (o true)
+
+  // ---------- Widgets ----------
+  function tape(){
+    mount("tape","ticker-tape",{
+      symbols:[
+        {proName:"FOREXCOM:SPXUSD",title:"S&P 500"},
+        {proName:"AMEX:VOO",title:"VOO"},
+        {proName:"AMEX:IVV",title:"IVV"},
+        {proName:"AMEX:SPY",title:"SPY"},
+        {proName:"FOREXCOM:NSXUSD",title:"Nasdaq 100"},
+        {proName:"FX_IDC:USDMXN",title:"USD/MXN"},
+        {proName:"AMEX:EWW",title:"México (ETF EWW)"},
+        {proName:"NASDAQ:AAPL",title:"Apple"},
+        {proName:"NASDAQ:MSFT",title:"Microsoft"},
+        {proName:"NASDAQ:NVDA",title:"Nvidia"},
+        {proName:"NASDAQ:AMZN",title:"Amazon"},
+        {proName:"NASDAQ:GOOGL",title:"Google"},
+        {proName:"NASDAQ:META",title:"Meta"},
+        {proName:"NASDAQ:TSLA",title:"Tesla"}
+      ],
+      showSymbolLogo:true, isTransparent:false, displayMode:"adaptive", colorTheme:"dark", locale:LOCALE
+    });
+  }
+
+  function chart(){
+    mount("w-chart","advanced-chart",{
+      autosize:true, symbol:state.sym, interval:"D", timezone:"exchange", theme:"dark", style:"1",
+      locale:LOCALE, backgroundColor:"rgba(24,32,51,1)", gridColor:"rgba(255,255,255,0.06)",
+      withdateranges:true, hide_side_toolbar:window.matchMedia("(max-width: 600px)").matches, allow_symbol_change:true, hide_volume:false,
+      details:false, hotlist:false, calendar:false, save_image:true,
+      studies:[
+        {id:"MASimple@tv-basicstudies", inputs:{length:50}},
+        {id:"MASimple@tv-basicstudies", inputs:{length:200}},
+        {id:"RSI@tv-basicstudies"},
+        {id:"MACD@tv-basicstudies"}
+      ],
+      support_host:"https://www.tradingview.com"
+    });
+  }
+  function ta(){
+    mount("w-ta","technical-analysis",{
+      interval:"1D", width:"100%", height:"100%", isTransparent:false, symbol:state.sym,
+      showIntervalTabs:true, displayMode:"single", locale:LOCALE, colorTheme:"dark"
+    });
+  }
+  function info(id){
+    mount(id,"symbol-info",{symbol:state.sym, width:"100%", locale:LOCALE, colorTheme:"dark", isTransparent:false});
+  }
+  function heat(){
+    mount("w-heat","stock-heatmap",{
+      exchanges:[], dataSource:"SPX500", grouping:"sector", blockSize:"market_cap_basic", blockColor:"change",
+      locale:LOCALE, symbolUrl:"", colorTheme:"dark", hasTopBar:true, isDataSetEnabled:true, isZoomEnabled:true,
+      hasSymbolTooltip:true, isMonoSize:false, width:"100%", height:"100%"
+    });
+  }
+  function hot(){
+    mount("w-hot","hotlists",{
+      colorTheme:"dark", dateRange:"1D", exchange:"US", showChart:true, locale:LOCALE, largeChartUrl:"",
+      isTransparent:false, showSymbolLogo:true, showFloatingTooltip:true, width:"100%", height:"100%"
+    });
+  }
+  function screener(){
+    mount("w-screen","screener",{
+      width:"100%", height:"100%", defaultColumn:"overview", defaultScreen:"most_capitalized",
+      market:"america", showToolbar:true, colorTheme:"dark", locale:LOCALE, isTransparent:false
+    });
+  }
+  function cal(){
+    mount("w-cal","events",{
+      colorTheme:"dark", isTransparent:false, width:"100%", height:"100%", locale:LOCALE,
+      importanceFilter:"-1,0,1", countryFilter:state.cal
+    });
+  }
+  function news(){
+    var cfg = {displayMode:"regular", colorTheme:"dark", isTransparent:false, locale:LOCALE, width:"100%", height:"100%"};
+    if(state.news === "sym"){ cfg.feedMode = "symbol"; cfg.symbol = state.sym; } else { cfg.feedMode = "all_symbols"; }
+    mount("w-news","timeline",cfg);
+  }
+  function profile(){
+    info("w-info2");
+    mount("w-prof","symbol-profile",{width:"100%", height:"100%", colorTheme:"dark", isTransparent:false, symbol:state.sym, locale:LOCALE});
+    mount("w-fin","financials",{colorTheme:"dark", isTransparent:false, displayMode:"regular", width:"100%", height:"100%", symbol:state.sym, locale:LOCALE});
+  }
+
+  // Qué dibujar en cada pestaña; las dependientes del símbolo guardan el símbolo usado
+  var TABS = {
+    grafica:{sym:true, draw:function(){ chart(); ta(); info("w-info1"); }},
+    mapa:{draw:heat}, movimientos:{draw:hot}, screener:{draw:screener},
+    calendario:{draw:cal}, noticias:{draw:news, symWhen:function(){return state.news==="sym";}},
+    perfil:{sym:true, draw:profile}, aprende:{draw:function(){}}
+  };
+
+  function needsSym(t){ var d=TABS[t]; return d.sym || (d.symWhen && d.symWhen()); }
+
+  function renderTab(t, force){
+    var d = TABS[t]; if(!d) return;
+    var key = needsSym(t) ? state.sym : true;
+    if(!force && rendered[t] === key) return;
+    d.draw(); rendered[t] = key;
+  }
+
+  function saveHash(){
+    var p = new URLSearchParams(); p.set("t", state.tab); p.set("s", state.sym);
+    history.replaceState(null, "", "#" + p.toString());
+  }
+
+  function showTab(t){
+    if(!TABS[t]) t = "grafica";
+    state.tab = t;
+    document.querySelectorAll("nav.tabs button").forEach(function(b){ b.classList.toggle("active", b.dataset.tab===t); });
+    document.querySelectorAll("section.tab").forEach(function(s){ s.classList.toggle("active", s.id==="tab-"+t); });
+    document.getElementById("symCard").style.display = (t==="grafica"||t==="perfil"||(t==="noticias"&&state.news==="sym")) ? "" : "none";
+    renderTab(t);
+    saveHash();
+  }
+
+  function setSym(s){
+    s = normSym(s); if(!s) return;
+    state.sym = s;
+    try{ localStorage.setItem("pm_sym", s); }catch(e){}
+    document.getElementById("curSym").textContent = s;
+    document.querySelectorAll("#chips .chip").forEach(function(c){ c.classList.toggle("on", c.dataset.s===s); });
+    renderTab(state.tab); // las demás pestañas se redibujan al abrirlas
+    saveHash();
+  }
+
+  // ---------- UI ----------
+  var chips = document.getElementById("chips"), dl = document.getElementById("symList");
+  PRESETS.forEach(function(p){
+    var b = document.createElement("button"); b.type="button"; b.className="chip"; b.dataset.s=p[0]; b.textContent=p[1];
+    b.title = p[0]; b.addEventListener("click", function(){ setSym(p[0]); });
+    chips.appendChild(b);
+    var o = document.createElement("option"); o.value = p[0]; o.label = p[1]; dl.appendChild(o);
+  });
+  document.getElementById("symForm").addEventListener("submit", function(e){
+    e.preventDefault(); var i = document.getElementById("symInput"); setSym(i.value); i.value=""; i.blur();
+  });
+  document.querySelectorAll("nav.tabs button").forEach(function(b){
+    b.addEventListener("click", function(){ showTab(b.dataset.tab); window.scrollTo({top:0}); });
+  });
+  document.querySelectorAll("#calSeg button").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll("#calSeg button").forEach(function(x){x.classList.toggle("on",x===b);});
+      state.cal = b.dataset.c; renderTab("calendario", true);
+    });
+  });
+  document.querySelectorAll("#newsSeg button").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll("#newsSeg button").forEach(function(x){x.classList.toggle("on",x===b);});
+      state.news = b.dataset.m; showTab("noticias"); renderTab("noticias", true);
+    });
+  });
+
+  // Indicador de mercado abierto/cerrado (NYSE, sin festivos)
+  function marketStatus(){
+    try{
+      var parts = new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",weekday:"short",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(new Date());
+      var g = {}; parts.forEach(function(p){ g[p.type]=p.value; });
+      var mins = (parseInt(g.hour,10)%24)*60 + parseInt(g.minute,10);
+      var wk = ["Sat","Sun"].indexOf(g.weekday) === -1;
+      var open = wk && mins >= 570 && mins < 960;
+      var local = new Intl.DateTimeFormat("es-MX",{timeZone:"America/Mazatlan",hour:"2-digit",minute:"2-digit"}).format(new Date());
+      document.getElementById("mktDot").className = "dot " + (open ? "open" : "closed");
+      document.getElementById("mktTxt").textContent = (open ? "Bolsa de NY abierta" : "Bolsa de NY cerrada") + " · " + local + " h Mazatlán";
+    }catch(e){ document.getElementById("mktTxt").textContent = ""; }
+  }
+
+  // ---------- Inicio ----------
+  tape();
+  document.getElementById("curSym").textContent = state.sym;
+  document.querySelectorAll("#chips .chip").forEach(function(c){ c.classList.toggle("on", c.dataset.s===state.sym); });
+  showTab(state.tab);
+  marketStatus(); setInterval(marketStatus, 30000);
+})();
+</script>
+</body>
+</html>

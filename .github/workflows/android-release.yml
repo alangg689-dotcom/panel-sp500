@@ -1,0 +1,115 @@
+name: Build and release APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sp500-apk-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+          restore-keys: gradle-
+
+      - name: Install Android SDK
+        run: |
+          set -euo pipefail
+          SDK_ROOT="$HOME/android-sdk"
+          mkdir -p "$SDK_ROOT/cmdline-tools"
+          curl -fsSL -o /tmp/cmdtools.zip "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+          rm -rf /tmp/cmdline-tools
+          unzip -q /tmp/cmdtools.zip -d /tmp/cmdline-tools-unpack
+          rm -rf "$SDK_ROOT/cmdline-tools/latest"
+          mv /tmp/cmdline-tools-unpack/cmdline-tools "$SDK_ROOT/cmdline-tools/latest"
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "$SDK_ROOT/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$SDK_ROOT/platform-tools" >> "$GITHUB_PATH"
+          echo "$SDK_ROOT/build-tools/34.0.0" >> "$GITHUB_PATH"
+          yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK_ROOT" --licenses >/dev/null || true
+          "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK_ROOT" \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "platform-tools"
+
+      - name: Create release keystore
+        working-directory: android
+        run: |
+          set -euo pipefail
+          keytool -genkeypair -v \
+            -keystore sp500-release.keystore \
+            -alias sp500 \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass android \
+            -keypass android \
+            -dname "CN=SP500 Panel, OU=Education, O=SP500, L=Mazatlan, ST=Sinaloa, C=MX"
+
+      - name: Build release APK
+        working-directory: android
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew assembleRelease --no-daemon --stacktrace
+          APK="$(find app/build/outputs/apk/release -type f -name '*.apk' ! -name '*unsigned*' | head -n 1)"
+          if [ -z "$APK" ]; then
+            echo "No se generó el APK firmado"
+            find app/build/outputs -type f || true
+            exit 1
+          fi
+          cp "$APK" "$RUNNER_TEMP/sp500-panel.apk"
+          "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --verbose "$RUNNER_TEMP/sp500-panel.apk"
+          echo "APK listo: $APK"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          APK="$RUNNER_TEMP/sp500-panel.apk"
+          test -f "$APK"
+          NOTES="$(cat <<'EOF'
+          Panel educativo SP&500 para Android.
+
+          Descarga **sp500-panel.apk** e instálalo permitiendo aplicaciones de orígenes desconocidos (Ajustes → Seguridad → Instalar apps desconocidas).
+
+          Los datos vienen de TradingView y pueden tener retraso. Esto no es asesoría financiera ni una recomendación de compra o venta.
+
+          Si una actualización no se instala encima de la versión anterior, desinstala la app y vuelve a instalar el APK: cada compilación firma el paquete con una clave generada en CI.
+          EOF
+          )"
+          if gh release view v1.0.0 >/dev/null 2>&1; then
+            gh release upload v1.0.0 "$APK" --clobber
+            gh release edit v1.0.0 --title "SP&500 v1.0.0" --notes "$NOTES" --latest
+          else
+            gh release create v1.0.0 "$APK" \
+              --title "SP&500 v1.0.0" \
+              --notes "$NOTES" \
+              --latest
+          fi
+          gh release view v1.0.0 --json url,tagName,assets
