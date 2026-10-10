@@ -56,19 +56,39 @@ jobs:
             "build-tools;34.0.0" \
             "platform-tools"
 
-      - name: Create release keystore
+      - name: Prepare release keystore
         working-directory: android
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           set -euo pipefail
-          keytool -genkeypair -v \
-            -keystore sp500-release.keystore \
-            -alias sp500 \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -storepass android \
-            -keypass android \
-            -dname "CN=SP500 Panel, OU=Education, O=SP500, L=Mazatlan, ST=Sinaloa, C=MX"
+          if [ -n "${ANDROID_KEYSTORE_BASE64}" ] && [ -n "${ANDROID_KEYSTORE_PASSWORD}" ] && [ -n "${ANDROID_KEY_ALIAS}" ] && [ -n "${ANDROID_KEY_PASSWORD}" ]; then
+            printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 -d > sp500-release.keystore
+            if [ ! -s sp500-release.keystore ]; then
+              echo "ANDROID_KEYSTORE_BASE64 no produjo un keystore."
+              exit 1
+            fi
+            keytool -list -keystore sp500-release.keystore -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" >/dev/null
+            echo "KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+            echo "KEY_ALIAS=$ANDROID_KEY_ALIAS" >> "$GITHUB_ENV"
+            echo "KEY_PASSWORD=$ANDROID_KEY_PASSWORD" >> "$GITHUB_ENV"
+            echo "Usando la llave de firma estable guardada en los secretos del repositorio."
+          else
+            echo "Faltan secretos de firma (ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD)."
+            echo "Se genera una llave temporal. Android puede exigir desinstalar la versión anterior para instalar esta."
+            keytool -genkeypair -v \
+              -keystore sp500-release.keystore \
+              -alias sp500 \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass android \
+              -keypass android \
+              -dname "CN=SP500 Panel, OU=Education, O=SP500, L=Mazatlan, ST=Sinaloa, C=MX"
+          fi
 
       - name: Build release APK
         working-directory: android
@@ -94,22 +114,22 @@ jobs:
           APK="$RUNNER_TEMP/sp500-panel.apk"
           test -f "$APK"
           NOTES="$(cat <<'EOF'
-          Panel educativo SP&500 para Android.
+          Panel educativo SP&500 para Android, con pestaña Simulador (paper trading ficticio).
 
           Descarga **sp500-panel.apk** e instálalo permitiendo aplicaciones de orígenes desconocidos (Ajustes → Seguridad → Instalar apps desconocidas).
 
-          Los datos vienen de TradingView y pueden tener retraso. Esto no es asesoría financiera ni una recomendación de compra o venta.
+          Los datos de mercado vienen de TradingView y pueden tener retraso. La simulación lee data/simulador.json; si ese archivo no existe, la app dice que aún no hay datos. Esto no es asesoría financiera ni una recomendación de compra o venta.
 
-          Si una actualización no se instala encima de la versión anterior, desinstala la app y vuelve a instalar el APK: cada compilación firma el paquete con una clave generada en CI.
+          La v1.0.0 se firmó con una llave de un solo uso. Para instalar esta versión encima de aquella, desinstala la app una vez. Si el repositorio tiene los secretos ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS y ANDROID_KEY_PASSWORD, las siguientes compilaciones usan esa misma llave y se pueden instalar encima. Si esos secretos no están, cada APK lleva una llave nueva y hay que desinstalar antes de actualizar.
           EOF
           )"
-          if gh release view v1.0.0 >/dev/null 2>&1; then
-            gh release upload v1.0.0 "$APK" --clobber
-            gh release edit v1.0.0 --title "SP&500 v1.0.0" --notes "$NOTES" --latest
+          if gh release view v1.1.0 >/dev/null 2>&1; then
+            gh release upload v1.1.0 "$APK" --clobber
+            gh release edit v1.1.0 --title "SP&500 v1.1.0" --notes "$NOTES" --latest
           else
-            gh release create v1.0.0 "$APK" \
-              --title "SP&500 v1.0.0" \
+            gh release create v1.1.0 "$APK" \
+              --title "SP&500 v1.1.0" \
               --notes "$NOTES" \
               --latest
           fi
-          gh release view v1.0.0 --json url,tagName,assets
+          gh release view v1.1.0 --json url,tagName,assets

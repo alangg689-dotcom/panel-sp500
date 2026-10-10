@@ -1,0 +1,48 @@
+{
+  "ejemplo": true,
+  "aviso": "EJEMPLO FICTICIO. No es la simulación real y la app no lee este archivo. El panel solo usa data/simulador.json en la rama main. Si ese archivo no existe, muestra «La simulación aún no tiene datos». Puedes copiar esta estructura, quitar ejemplo y aviso, y guardar el resultado como data/simulador.json.",
+  "actualizado": "2026-10-01T15:00:00-07:00",
+  "moneda": "USD",
+  "cartera": [
+    {
+      "estrategia": "EJEMPLO: paper trading",
+      "valor_inicial": 10000,
+      "valor_actual": 10420.55,
+      "rendimiento_pct": 4.21,
+      "max_caida_pct": -4.15
+    }
+  ],
+  "referencia": {
+    "estrategia": "Comprar y mantener S&P 500",
+    "valor_inicial": 10000,
+    "valor_actual": 10780.1,
+    "rendimiento_pct": 7.8,
+    "max_caida_pct": -3.48
+  },
+  "equity": [
+    {"fecha": "2026-06-02", "estrategia": "EJEMPLO: paper trading", "valor": 10000},
+    {"fecha": "2026-06-02", "estrategia": "Comprar y mantener S&P 500", "valor": 10000},
+    {"fecha": "2026-06-16", "estrategia": "EJEMPLO: paper trading", "valor": 9850},
+    {"fecha": "2026-06-16", "estrategia": "Comprar y mantener S&P 500", "valor": 10110},
+    {"fecha": "2026-07-01", "estrategia": "EJEMPLO: paper trading", "valor": 10120},
+    {"fecha": "2026-07-01", "estrategia": "Comprar y mantener S&P 500", "valor": 10340},
+    {"fecha": "2026-07-15", "estrategia": "EJEMPLO: paper trading", "valor": 9700},
+    {"fecha": "2026-07-15", "estrategia": "Comprar y mantener S&P 500", "valor": 9980},
+    {"fecha": "2026-08-03", "estrategia": "EJEMPLO: paper trading", "valor": 10040},
+    {"fecha": "2026-08-03", "estrategia": "Comprar y mantener S&P 500", "valor": 10450},
+    {"fecha": "2026-08-17", "estrategia": "EJEMPLO: paper trading", "valor": 10310},
+    {"fecha": "2026-08-17", "estrategia": "Comprar y mantener S&P 500", "valor": 10620},
+    {"fecha": "2026-09-01", "estrategia": "EJEMPLO: paper trading", "valor": 10200},
+    {"fecha": "2026-09-01", "estrategia": "Comprar y mantener S&P 500", "valor": 10510},
+    {"fecha": "2026-09-15", "estrategia": "EJEMPLO: paper trading", "valor": 10550},
+    {"fecha": "2026-09-15", "estrategia": "Comprar y mantener S&P 500", "valor": 10890},
+    {"fecha": "2026-10-01", "estrategia": "EJEMPLO: paper trading", "valor": 10420.55},
+    {"fecha": "2026-10-01", "estrategia": "Comprar y mantener S&P 500", "valor": 10780.1}
+  ],
+  "operaciones": [
+    {"fecha": "2026-06-02", "estrategia": "EJEMPLO: paper trading", "activo": "VOO", "accion": "compra", "titulos": 8, "precio": 545.2, "comision": 0},
+    {"fecha": "2026-07-15", "estrategia": "EJEMPLO: paper trading", "activo": "VOO", "accion": "venta", "titulos": 2, "precio": 530, "comision": 0},
+    {"fecha": "2026-08-17", "estrategia": "EJEMPLO: paper trading", "activo": "AAPL", "accion": "compra", "titulos": 5, "precio": 220.4, "comision": 0},
+    {"fecha": "2026-09-15", "estrategia": "EJEMPLO: paper trading", "activo": "VOO", "accion": "compra", "titulos": 2, "precio": 560.1, "comision": 0}
+  ]
+}

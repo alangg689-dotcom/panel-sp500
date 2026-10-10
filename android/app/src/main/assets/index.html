@@ -66,6 +66,23 @@
   .tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
   .tbl th{background:var(--panel2)}
   .pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;border:1px solid var(--line);color:var(--muted)}
+  button.ghost{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:8px 11px;font-size:14px;cursor:pointer}
+  .sim-top{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+  .sim-top h2{margin:0}
+  .sim-empty{margin:8px 0 0;padding:14px;border:1px dashed var(--line);border-radius:var(--r);color:var(--txt);background:var(--panel2)}
+  .sim-vs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0}
+  .sim-stat{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .sim-stat .k{color:var(--muted);font-size:12.5px}
+  .sim-stat .v{font-size:18px;font-weight:700;margin-top:2px;word-break:break-word}
+  .sim-stat .s{font-size:13px;margin-top:2px}
+  .pos{color:var(--ok)} .neg{color:var(--bad)}
+  .sim-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;margin:4px 0 12px}
+  .chart-wrap{position:relative;width:100%;height:280px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .chart-wrap canvas{width:100%;height:100%;display:block}
+  .legend{display:flex;flex-wrap:wrap;gap:10px 14px;margin:8px 0 4px;font-size:13px;color:var(--muted)}
+  .legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+  .sim-note{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+  .tbl-wrap{overflow-x:auto}
   footer{color:var(--muted);font-size:12.5px;text-align:center;padding:16px 12px 30px;border-top:1px solid var(--line)}
   @media (max-width:1000px){ .grid,.twocol{grid-template-columns:1fr} }
   @media (max-width:600px){
@@ -76,6 +93,8 @@
     .card{padding:10px}
     #w-info2{height:300px}
     .disclaimer{font-size:12.5px;padding:8px 10px;margin:8px 8px 0}
+    .sim-vs{grid-template-columns:1fr}
+    .chart-wrap{height:240px}
     .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
     .chips::-webkit-scrollbar{display:none}
     .chip{flex:0 0 auto}
@@ -101,11 +120,12 @@
     <button type="button" data-tab="calendario">Calendario</button>
     <button type="button" data-tab="noticias">Noticias</button>
     <button type="button" data-tab="perfil">Perfil y fundamentales</button>
+    <button type="button" data-tab="simulador">Simulador</button>
     <button type="button" data-tab="aprende">Cómo leer esto</button>
   </nav>
 
 <div class="disclaimer" role="note">
-  <b>⚠️ Herramienta educativa.</b> Los datos vienen de TradingView y pueden tener <b>retraso</b> (en acciones de EE. UU. suele ser de minutos). Esto <b>no es asesoría financiera ni una recomendación de compra o venta</b>. El trading de corto plazo es muy riesgoso y la mayoría de los principiantes pierde dinero. Para comprar, usa tu casa de bolsa regulada (p. ej. GBM).
+  <b>⚠️ Herramienta educativa.</b> Los datos vienen de TradingView y pueden tener <b>retraso</b> (en acciones de EE. UU. suele ser de minutos). Esto <b>no es asesoría financiera ni una recomendación de compra o venta</b>. El trading de corto plazo es muy riesgoso y la mayoría de los principiantes pierde dinero. Para comprar, usa tu casa de bolsa regulada (p. ej. GBM). La pestaña Simulador es paper trading: una cartera ficticia, no operaciones reales.
 </div>
 
 <main>
@@ -211,7 +231,42 @@
     </div>
   </section>
 
-  <!-- 10) Guía -->
+  <!-- 10) Simulador de paper trading -->
+  <section class="tab" id="tab-simulador">
+    <div class="card">
+      <div class="sim-top">
+        <h2>Simulador</h2>
+        <button type="button" class="ghost" id="simReload">Actualizar</button>
+      </div>
+      <p class="hint">Cartera <b>ficticia</b> de paper trading frente a comprar el S&amp;P 500 y mantenerlo. No es dinero real, no mueve tu cuenta de GBM y <b>no es asesoría financiera ni una recomendación de compra o venta</b>.</p>
+      <p id="simStatus" class="hint" aria-live="polite">Cargando simulación…</p>
+      <p id="simEmpty" class="sim-empty" hidden>La simulación aún no tiene datos</p>
+      <div id="simBody" hidden>
+        <p class="hint" id="simUpdated"></p>
+        <div class="sim-vs" id="simVs"></div>
+        <div class="sim-cards" id="simCards"></div>
+        <h3>Evolución del valor</h3>
+        <p class="hint" id="simChartSummary"></p>
+        <div class="chart-wrap"><canvas id="simChart" role="img" aria-labelledby="simChartSummary"></canvas></div>
+        <div class="legend" id="simLegend"></div>
+        <h3>Últimas operaciones</h3>
+        <div class="tbl-wrap">
+          <table class="tbl" id="simOps">
+            <thead>
+              <tr>
+                <th>Fecha</th><th>Estrategia</th><th>Activo</th><th>Acción</th><th>Títulos</th><th>Precio</th><th>Comisión</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="hint" id="simOpsNote"></p>
+        <p class="sim-note">Fuente pública: <a href="https://raw.githubusercontent.com/alangg689-dotcom/panel-sp500/main/data/simulador.json" target="_blank" rel="noopener">data/simulador.json</a> en la rama main. El formato de ejemplo está en <a href="https://github.com/alangg689-dotcom/panel-sp500/blob/main/data/simulador.example.json" target="_blank" rel="noopener">data/simulador.example.json</a> y no se usa como cartera real.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11) Guía -->
   <section class="tab" id="tab-aprende">
     <div class="card guide">
       <h2>Cómo leer esto (guía para principiantes)</h2>
@@ -283,8 +338,11 @@
       <ul>
         <li>Los datos pueden tener retraso. Los widgets gratuitos no muestran algunos índices oficiales: el “S&amp;P 500” de la cinta es un CFD que sigue al índice (FOREXCOM:SPXUSD) y el IPC de México no está disponible, así que se usa el ETF <b>EWW</b> (acciones mexicanas en dólares) como referencia.</li>
         <li>Los indicadores técnicos funcionan mejor como contexto; ninguno garantiza resultados.</li>
-        <li>Corto plazo = más riesgo. Si quieres practicar trading, hazlo primero en simulación (TradingView tiene “Paper Trading”) y nunca con dinero que necesites.</li>
+        <li>Corto plazo = más riesgo. Si quieres practicar trading, hazlo primero en simulación y nunca con dinero que necesites.</li>
       </ul>
+
+      <h3>🧪 Simulador</h3>
+      <p>La pestaña Simulador lee una cartera de práctica y la compara con haber comprado el S&amp;P 500 y no vender: valor actual, rendimiento, peor caída y las últimas operaciones. Si el archivo todavía no está en el repositorio, verás el mensaje “La simulación aún no tiene datos”. Es un ejercicio, no una cuenta real.</p>
 
       <h3>✅ Rutina sugerida (5 minutos al mes)</h3>
       <ol>
@@ -435,12 +493,336 @@
     mount("w-fin","financials",{colorTheme:"dark", isTransparent:false, displayMode:"regular", width:"100%", height:"100%", symbol:state.sym, locale:LOCALE});
   }
 
+  // ---------- Simulador (paper trading, JSON público) ----------
+  var SIM_URL = "https://raw.githubusercontent.com/alangg689-dotcom/panel-sp500/main/data/simulador.json";
+  var SIM_EMPTY = "La simulación aún no tiene datos";
+  var simData = null;
+  var simSeq = 0;
+
+  function money(n, currency){
+    if(n == null || n === "" || isNaN(Number(n))) return "—";
+    var cur = currency || "USD";
+    try{
+      return new Intl.NumberFormat("es-MX", {style:"currency", currency:cur, maximumFractionDigits:2}).format(Number(n));
+    }catch(e){
+      return (cur === "USD" ? "US$" : cur + " ") + Number(n).toFixed(2);
+    }
+  }
+  function pct(n){
+    if(n == null || n === "" || isNaN(Number(n))) return "—";
+    var v = Number(n);
+    var sign = v > 0 ? "+" : "";
+    return sign + new Intl.NumberFormat("es-MX", {minimumFractionDigits:2, maximumFractionDigits:2}).format(v) + "%";
+  }
+  function caida(n){
+    if(n == null || n === "" || isNaN(Number(n))) return "—";
+    var v = Number(n);
+    if(v > 0) v = -v;
+    return pct(v);
+  }
+  function fmtDate(iso){
+    if(!iso) return "—";
+    var s = String(iso);
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+    if(m) return m[3] + "/" + m[2] + "/" + m[1];
+    var d = new Date(s);
+    if(isNaN(d.getTime())) return s;
+    try{
+      return new Intl.DateTimeFormat("es-MX", {dateStyle:"medium", timeStyle:"short"}).format(d);
+    }catch(e){
+      return s;
+    }
+  }
+  function parseTime(s){
+    if(!s) return null;
+    if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return Date.parse(s + "T00:00:00Z");
+    var t = Date.parse(s);
+    return isNaN(t) ? null : t;
+  }
+  function clsPct(n){
+    if(n == null || isNaN(Number(n))) return "";
+    return Number(n) > 0 ? "pos" : (Number(n) < 0 ? "neg" : "");
+  }
+  function hasSimData(data){
+    if(!data || typeof data !== "object") return false;
+    if(Array.isArray(data.cartera) && data.cartera.length) return true;
+    if(data.referencia && typeof data.referencia === "object" && (data.referencia.valor_actual != null || data.referencia.estrategia)) return true;
+    if(Array.isArray(data.equity) && data.equity.length) return true;
+    if(Array.isArray(data.operaciones) && data.operaciones.length) return true;
+    return false;
+  }
+  function simStat(k, v, sub, subClass){
+    var el = document.createElement("div");
+    el.className = "sim-stat";
+    var kk = document.createElement("div"); kk.className = "k"; kk.textContent = k;
+    var vv = document.createElement("div"); vv.className = "v"; vv.textContent = v;
+    el.appendChild(kk); el.appendChild(vv);
+    if(sub){
+      var ss = document.createElement("div"); ss.className = "s" + (subClass ? " " + subClass : "");
+      ss.textContent = sub;
+      el.appendChild(ss);
+    }
+    return el;
+  }
+  function seriesFrom(data){
+    var refName = data.referencia && data.referencia.estrategia;
+    var by = {};
+    (data.equity || []).forEach(function(p){
+      if(!p || p.estrategia == null || p.valor == null || !p.fecha) return;
+      var t = parseTime(p.fecha);
+      if(t == null || isNaN(Number(p.valor))) return;
+      if(!by[p.estrategia]) by[p.estrategia] = [];
+      by[p.estrategia].push({t:t, fecha:String(p.fecha), v:Number(p.valor)});
+    });
+    Object.keys(by).forEach(function(k){ by[k].sort(function(a,b){ return a.t - b.t; }); });
+    var order = [];
+    (data.cartera || []).forEach(function(c){
+      if(c && c.estrategia && order.indexOf(c.estrategia) < 0) order.push(c.estrategia);
+    });
+    if(refName && order.indexOf(refName) < 0) order.push(refName);
+    Object.keys(by).forEach(function(n){ if(order.indexOf(n) < 0) order.push(n); });
+    var palette = ["#3fa9ff", "#22c55e", "#c084fc", "#fb7185", "#67e8f9"];
+    var i = 0;
+    return order.filter(function(n){ return by[n] && by[n].length; }).map(function(n){
+      var isRef = n === refName;
+      return {name:n, color: isRef ? "#f5b301" : palette[i++ % palette.length], pts:by[n], ref:isRef};
+    });
+  }
+  function drawChart(data){
+    var canvas = document.getElementById("simChart");
+    var summary = document.getElementById("simChartSummary");
+    var legend = document.getElementById("simLegend");
+    if(!canvas || !summary || !legend) return;
+    legend.textContent = "";
+    var series = seriesFrom(data || {});
+    var currency = (data && data.moneda) || "USD";
+    if(!series.length){
+      summary.textContent = "No hay serie de valores para dibujar la gráfica.";
+      var emptyCtx = canvas.getContext("2d");
+      if(emptyCtx) emptyCtx.clearRect(0, 0, canvas.width || 0, canvas.height || 0);
+      return;
+    }
+    var bits = series.map(function(s){
+      var a = s.pts[0], b = s.pts[s.pts.length - 1];
+      return s.name + " pasó de " + money(a.v, currency) + " a " + money(b.v, currency);
+    });
+    summary.textContent = bits.join(". ") + ".";
+    series.forEach(function(s){
+      var item = document.createElement("span");
+      var sw = document.createElement("i");
+      sw.style.background = s.color;
+      item.appendChild(sw);
+      item.appendChild(document.createTextNode(s.ref ? s.name + " (referencia)" : s.name));
+      legend.appendChild(item);
+    });
+    var wrap = canvas.parentNode;
+    var cssW = (wrap && wrap.clientWidth) || 640;
+    var cssH = (wrap && wrap.clientHeight) || 280;
+    if(cssW < 20) cssW = 640;
+    if(cssH < 20) cssH = 280;
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    var ctx = canvas.getContext("2d");
+    if(!ctx) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var padL = 62, padR = 14, padT = 16, padB = 32;
+    var w = cssW - padL - padR, h = cssH - padT - padB;
+    var minV = Infinity, maxV = -Infinity, t0 = Infinity, t1 = -Infinity;
+    series.forEach(function(s){
+      s.pts.forEach(function(p){
+        if(p.v < minV) minV = p.v;
+        if(p.v > maxV) maxV = p.v;
+        if(p.t < t0) t0 = p.t;
+        if(p.t > t1) t1 = p.t;
+      });
+    });
+    if(minV === maxV){ minV -= 1; maxV += 1; }
+    var span = maxV - minV;
+    minV -= span * 0.08; maxV += span * 0.08;
+    if(t0 === t1){ t0 -= 86400000; t1 += 86400000; }
+    function xOf(t){ return padL + (t - t0) / (t1 - t0) * w; }
+    function yOf(v){ return padT + (maxV - v) / (maxV - minV) * h; }
+    ctx.clearRect(0, 0, cssW, cssH);
+    ctx.fillStyle = "#182033";
+    ctx.fillRect(0, 0, cssW, cssH);
+    ctx.font = "12px system-ui, sans-serif";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+    ctx.strokeStyle = "#243049";
+    ctx.fillStyle = "#9aa6bf";
+    ctx.lineWidth = 1;
+    for(var g = 0; g <= 4; g++){
+      var val = minV + (maxV - minV) * (g / 4);
+      var y = yOf(val);
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + w, y); ctx.stroke();
+      ctx.fillText(new Intl.NumberFormat("es-MX", {maximumFractionDigits:0}).format(val), padL - 6, y);
+    }
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    [0, 0.5, 1].forEach(function(f){
+      var t = t0 + (t1 - t0) * f;
+      var label = new Date(t).toISOString().slice(0, 10);
+      var parts = label.split("-");
+      ctx.fillText(parts[2] + "/" + parts[1], xOf(t), padT + h + 8);
+    });
+    series.forEach(function(s){
+      ctx.beginPath();
+      ctx.strokeStyle = s.color;
+      ctx.lineWidth = 2;
+      s.pts.forEach(function(p, idx){
+        var x = xOf(p.t), y = yOf(p.v);
+        if(idx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+      var last = s.pts[s.pts.length - 1];
+      ctx.fillStyle = s.color;
+      ctx.beginPath();
+      ctx.arc(xOf(last.t), yOf(last.v), 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+  function renderSim(data){
+    var currency = data.moneda || "USD";
+    var body = document.getElementById("simBody");
+    var empty = document.getElementById("simEmpty");
+    var status = document.getElementById("simStatus");
+    body.hidden = false;
+    empty.hidden = true;
+    status.textContent = "";
+    status.hidden = true;
+    var updated = document.getElementById("simUpdated");
+    updated.textContent = data.actualizado ? ("Actualizado: " + fmtDate(data.actualizado) + (currency ? " · " + currency : "")) : (currency ? currency : "");
+    var vs = document.getElementById("simVs");
+    vs.textContent = "";
+    var primary = (Array.isArray(data.cartera) && data.cartera[0]) || null;
+    var ref = data.referencia || null;
+    if(primary){
+      vs.appendChild(simStat(primary.estrategia || "Cartera", money(primary.valor_actual, currency), "Rendimiento " + pct(primary.rendimiento_pct), clsPct(primary.rendimiento_pct)));
+    }
+    if(ref){
+      vs.appendChild(simStat(ref.estrategia || "Comprar y mantener S&P 500", money(ref.valor_actual, currency), "Rendimiento " + pct(ref.rendimiento_pct), clsPct(ref.rendimiento_pct)));
+    }
+    if(primary && ref && primary.valor_actual != null && ref.valor_actual != null && !isNaN(Number(primary.valor_actual)) && !isNaN(Number(ref.valor_actual))){
+      var diffVal = Number(primary.valor_actual) - Number(ref.valor_actual);
+      var diffPct = (primary.rendimiento_pct != null && ref.rendimiento_pct != null) ? (Number(primary.rendimiento_pct) - Number(ref.rendimiento_pct)) : null;
+      var sub = diffPct == null || isNaN(diffPct) ? "Valor actual menos comprar y mantener" : ("Rendimiento " + pct(diffPct) + " vs comprar y mantener");
+      vs.appendChild(simStat("Diferencia", money(diffVal, currency), sub, diffPct == null ? clsPct(diffVal) : clsPct(diffPct)));
+    }
+    var cards = document.getElementById("simCards");
+    cards.textContent = "";
+    function detailCard(item, refLabel){
+      if(!item) return;
+      var box = document.createElement("div");
+      box.className = "sim-stat";
+      var title = document.createElement("div"); title.className = "k";
+      title.textContent = (refLabel ? "Referencia · " : "") + (item.estrategia || "Estrategia");
+      var val = document.createElement("div"); val.className = "v"; val.textContent = money(item.valor_actual, currency);
+      var meta = document.createElement("div"); meta.className = "s";
+      meta.textContent = "Inicial " + money(item.valor_inicial, currency);
+      var row = document.createElement("div"); row.className = "s";
+      var r1 = document.createElement("span"); r1.className = clsPct(item.rendimiento_pct); r1.textContent = pct(item.rendimiento_pct);
+      row.appendChild(document.createTextNode("Rendimiento "));
+      row.appendChild(r1);
+      row.appendChild(document.createTextNode(" · Peor caída "));
+      var r2 = document.createElement("span"); r2.className = "neg"; r2.textContent = caida(item.max_caida_pct);
+      row.appendChild(r2);
+      box.appendChild(title); box.appendChild(val); box.appendChild(meta); box.appendChild(row);
+      cards.appendChild(box);
+    }
+    (data.cartera || []).forEach(function(item){ detailCard(item, false); });
+    if(ref) detailCard(ref, true);
+    drawChart(data);
+    var tbody = document.querySelector("#simOps tbody");
+    tbody.textContent = "";
+    var ops = (data.operaciones || []).slice().filter(function(op){ return op && typeof op === "object"; });
+    ops.sort(function(a, b){
+      var ta = parseTime(a.fecha) || 0, tb = parseTime(b.fecha) || 0;
+      return tb - ta;
+    });
+    var shown = ops.slice(0, 40);
+    var note = document.getElementById("simOpsNote");
+    if(!shown.length){
+      note.textContent = "Todavía no hay operaciones en el archivo.";
+    } else if(ops.length > shown.length){
+      note.textContent = "Se muestran las " + shown.length + " operaciones más recientes de " + ops.length + ".";
+    } else {
+      note.textContent = shown.length === 1 ? "1 operación." : (shown.length + " operaciones.");
+    }
+    shown.forEach(function(op){
+      var tr = document.createElement("tr");
+      function cell(text, className){
+        var td = document.createElement("td");
+        td.textContent = (text == null || text === "") ? "—" : String(text);
+        if(className) td.className = className;
+        tr.appendChild(td);
+      }
+      cell(fmtDate(op.fecha));
+      cell(op.estrategia);
+      cell(op.activo);
+      var accion = op.accion == null ? "" : String(op.accion);
+      var accionCls = /venta/i.test(accion) ? "neg" : (/compra/i.test(accion) ? "pos" : "");
+      cell(accion, accionCls);
+      cell(op.titulos == null || op.titulos === "" || isNaN(Number(op.titulos)) ? "—" : new Intl.NumberFormat("es-MX", {maximumFractionDigits:4}).format(Number(op.titulos)));
+      cell(money(op.precio, currency));
+      cell(money(op.comision, currency));
+      tbody.appendChild(tr);
+    });
+  }
+  function showSimMessage(kind, text){
+    var body = document.getElementById("simBody");
+    var empty = document.getElementById("simEmpty");
+    var status = document.getElementById("simStatus");
+    body.hidden = true;
+    if(kind === "empty"){
+      empty.hidden = false;
+      empty.textContent = SIM_EMPTY;
+      status.textContent = "";
+      status.hidden = true;
+    } else {
+      empty.hidden = true;
+      status.hidden = false;
+      status.textContent = text || "";
+    }
+  }
+  function loadSim(force){
+    var seq = ++simSeq;
+    if(!force && simData){
+      renderSim(simData);
+      return;
+    }
+    showSimMessage("status", "Cargando simulación…");
+    var url = SIM_URL + (SIM_URL.indexOf("?") >= 0 ? "&" : "?") + "t=" + Date.now();
+    fetch(url, {cache:"no-store", credentials:"omit"})
+      .then(function(res){
+        if(seq !== simSeq) return;
+        if(res.status === 404){ simData = null; showSimMessage("empty"); return; }
+        if(!res.ok) throw new Error("http " + res.status);
+        return res.json().then(function(data){
+          if(seq !== simSeq) return;
+          if(!hasSimData(data)){ simData = null; showSimMessage("empty"); return; }
+          simData = data;
+          renderSim(data);
+        });
+      })
+      .catch(function(err){
+        if(seq !== simSeq) return;
+        simData = null;
+        var invalid = err && (err.name === "SyntaxError" || /JSON/i.test(String(err.message || "")));
+        showSimMessage("status", invalid
+          ? "El archivo de simulación existe, pero no es un JSON válido."
+          : "No se pudieron cargar los datos de la simulación. Revisa tu conexión e inténtalo de nuevo.");
+      });
+  }
+
   // Qué dibujar en cada pestaña; las dependientes del símbolo guardan el símbolo usado
   var TABS = {
     grafica:{sym:true, draw:function(){ chart(); ta(); info("w-info1"); }},
     mapa:{draw:heat}, movimientos:{draw:hot}, screener:{draw:screener},
     calendario:{draw:cal}, noticias:{draw:news, symWhen:function(){return state.news==="sym";}},
-    perfil:{sym:true, draw:profile}, aprende:{draw:function(){}}
+    perfil:{sym:true, draw:profile},
+    simulador:{draw:function(){ loadSim(false); }},
+    aprende:{draw:function(){}}
   };
 
   function needsSym(t){ var d=TABS[t]; return d.sym || (d.symWhen && d.symWhen()); }
@@ -464,6 +846,7 @@
     document.querySelectorAll("section.tab").forEach(function(s){ s.classList.toggle("active", s.id==="tab-"+t); });
     document.getElementById("symCard").style.display = (t==="grafica"||t==="perfil"||(t==="noticias"&&state.news==="sym")) ? "" : "none";
     renderTab(t);
+    if(t === "simulador" && simData) drawChart(simData);
     saveHash();
   }
 
@@ -491,6 +874,8 @@
   document.querySelectorAll("nav.tabs button").forEach(function(b){
     b.addEventListener("click", function(){ showTab(b.dataset.tab); window.scrollTo({top:0}); });
   });
+  document.getElementById("simReload").addEventListener("click", function(){ loadSim(true); });
+  window.addEventListener("resize", function(){ if(state.tab === "simulador" && simData) drawChart(simData); });
   document.querySelectorAll("#calSeg button").forEach(function(b){
     b.addEventListener("click", function(){
       document.querySelectorAll("#calSeg button").forEach(function(x){x.classList.toggle("on",x===b);});
