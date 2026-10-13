@@ -1,35 +1,35 @@
 {
-  "actualizado": "2026-10-12T15:12:05-07:00",
+  "actualizado": "2026-10-13T15:02:56-07:00",
   "moneda": "USD",
   "cartera": [
     {
       "estrategia": "Cruce 50/200 sobre QQQ",
       "valor_inicial": 5478.67,
-      "valor_actual": 5478.67,
-      "rendimiento_pct": 0.0,
-      "max_caida_pct": 0.0
+      "valor_actual": 5460.09,
+      "rendimiento_pct": -0.34,
+      "max_caida_pct": -0.34
     },
     {
       "estrategia": "Cruce 50/200 sobre SPY",
       "valor_inicial": 5478.67,
-      "valor_actual": 5478.67,
-      "rendimiento_pct": 0.0,
-      "max_caida_pct": 0.0
+      "valor_actual": 5460.09,
+      "rendimiento_pct": -0.34,
+      "max_caida_pct": -0.34
     },
     {
       "estrategia": "Rotación mensual por momentum (SPY, QQQ, EFA, TLT, GLD)",
       "valor_inicial": 5478.67,
-      "valor_actual": 5478.67,
-      "rendimiento_pct": 0.0,
-      "max_caida_pct": 0.0
+      "valor_actual": 5460.09,
+      "rendimiento_pct": -0.34,
+      "max_caida_pct": -0.34
     }
   ],
   "referencia": {
     "estrategia": "Comprar y mantener SPY (punto de referencia)",
     "valor_inicial": 5478.67,
-    "valor_actual": 5478.67,
-    "rendimiento_pct": 0.0,
-    "max_caida_pct": 0.0
+    "valor_actual": 5460.09,
+    "rendimiento_pct": -0.34,
+    "max_caida_pct": -0.34
   },
   "equity": [
     {
@@ -51,7 +51,73 @@
       "fecha": "2026-10-12",
       "estrategia": "Rotación mensual por momentum (SPY, QQQ, EFA, TLT, GLD)",
       "valor": 5478.67
+    },
+    {
+      "fecha": "2026-10-13",
+      "estrategia": "Comprar y mantener SPY (punto de referencia)",
+      "valor": 5460.09
+    },
+    {
+      "fecha": "2026-10-13",
+      "estrategia": "Cruce 50/200 sobre QQQ",
+      "valor": 5460.09
+    },
+    {
+      "fecha": "2026-10-13",
+      "estrategia": "Cruce 50/200 sobre SPY",
+      "valor": 5460.09
+    },
+    {
+      "fecha": "2026-10-13",
+      "estrategia": "Rotación mensual por momentum (SPY, QQQ, EFA, TLT, GLD)",
+      "valor": 5460.09
     }
   ],
-  "operaciones": []
+  "operaciones": [
+    {
+      "fecha": "2026-10-13",
+      "estrategia": "Comprar y mantener SPY (punto de referencia)",
+      "activo": "SPY",
+      "accion": "compra",
+      "titulos": 7.018024,
+      "precio": 778.399,
+      "comision": 15.8422
+    },
+    {
+      "fecha": "2026-10-13",
+      "estrategia": "Cruce 50/200 sobre QQQ",
+      "activo": "QQQ",
+      "accion": "compra",
+      "titulos": 7.343079,
+      "precio": 743.9418,
+      "comision": 15.8422
+    },
+    {
+      "fecha": "2026-10-13",
+      "estrategia": "Cruce 50/200 sobre SPY",
+      "activo": "SPY",
+      "accion": "compra",
+      "titulos": 7.018024,
+      "precio": 778.399,
+      "comision": 15.8422
+    },
+    {
+      "fecha": "2026-10-13",
+      "estrategia": "Rotación mensual por momentum (SPY, QQQ, EFA, TLT, GLD)",
+      "activo": "QQQ",
+      "accion": "compra",
+      "titulos": 3.671539,
+      "precio": 743.9418,
+      "comision": 7.9211
+    },
+    {
+      "fecha": "2026-10-13",
+      "estrategia": "Rotación mensual por momentum (SPY, QQQ, EFA, TLT, GLD)",
+      "activo": "SPY",
+      "accion": "compra",
+      "titulos": 3.509012,
+      "precio": 778.399,
+      "comision": 7.9211
+    }
+  ]
 }
