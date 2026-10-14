@@ -1,35 +1,35 @@
 {
-  "actualizado": "2026-10-13T15:02:56-07:00",
+  "actualizado": "2026-10-14T15:02:48-07:00",
   "moneda": "USD",
   "cartera": [
     {
       "estrategia": "Cruce 50/200 sobre QQQ",
       "valor_inicial": 5478.67,
-      "valor_actual": 5460.09,
-      "rendimiento_pct": -0.34,
-      "max_caida_pct": -0.34
+      "valor_actual": 5352.74,
+      "rendimiento_pct": -2.3,
+      "max_caida_pct": -2.3
     },
     {
       "estrategia": "Cruce 50/200 sobre SPY",
       "valor_inicial": 5478.67,
-      "valor_actual": 5460.09,
-      "rendimiento_pct": -0.34,
-      "max_caida_pct": -0.34
+      "valor_actual": 5401.07,
+      "rendimiento_pct": -1.42,
+      "max_caida_pct": -1.42
     },
     {
       "estrategia": "Rotación mensual por momentum (SPY, QQQ, EFA, TLT, GLD)",
       "valor_inicial": 5478.67,
-      "valor_actual": 5460.09,
-      "rendimiento_pct": -0.34,
-      "max_caida_pct": -0.34
+      "valor_actual": 5376.9,
+      "rendimiento_pct": -1.86,
+      "max_caida_pct": -1.86
     }
   ],
   "referencia": {
     "estrategia": "Comprar y mantener SPY (punto de referencia)",
     "valor_inicial": 5478.67,
-    "valor_actual": 5460.09,
-    "rendimiento_pct": -0.34,
-    "max_caida_pct": -0.34
+    "valor_actual": 5401.07,
+    "rendimiento_pct": -1.42,
+    "max_caida_pct": -1.42
   },
   "equity": [
     {
@@ -71,6 +71,26 @@
       "fecha": "2026-10-13",
       "estrategia": "Rotación mensual por momentum (SPY, QQQ, EFA, TLT, GLD)",
       "valor": 5460.09
+    },
+    {
+      "fecha": "2026-10-14",
+      "estrategia": "Comprar y mantener SPY (punto de referencia)",
+      "valor": 5401.07
+    },
+    {
+      "fecha": "2026-10-14",
+      "estrategia": "Cruce 50/200 sobre QQQ",
+      "valor": 5352.74
+    },
+    {
+      "fecha": "2026-10-14",
+      "estrategia": "Cruce 50/200 sobre SPY",
+      "valor": 5401.07
+    },
+    {
+      "fecha": "2026-10-14",
+      "estrategia": "Rotación mensual por momentum (SPY, QQQ, EFA, TLT, GLD)",
+      "valor": 5376.9
     }
   ],
   "operaciones": [
