@@ -1,35 +1,42 @@
 {
-  "actualizado": "2026-10-15T15:04:14-07:00",
+  "actualizado": "2026-10-16T15:02:25-07:00",
   "moneda": "USD",
   "cartera": [
     {
       "estrategia": "Cruce 50/200 sobre QQQ",
       "valor_inicial": 5478.67,
-      "valor_actual": 5345.76,
-      "rendimiento_pct": -2.43,
-      "max_caida_pct": -2.43
+      "valor_actual": 5212.12,
+      "rendimiento_pct": -4.87,
+      "max_caida_pct": -4.87
     },
     {
       "estrategia": "Cruce 50/200 sobre SPY",
       "valor_inicial": 5478.67,
-      "valor_actual": 5416.44,
-      "rendimiento_pct": -1.14,
-      "max_caida_pct": -1.42
+      "valor_actual": 5356.51,
+      "rendimiento_pct": -2.23,
+      "max_caida_pct": -2.23
     },
     {
       "estrategia": "Rotación mensual por momentum (SPY, QQQ, EFA, TLT, GLD)",
       "valor_inicial": 5478.67,
-      "valor_actual": 5381.1,
-      "rendimiento_pct": -1.78,
-      "max_caida_pct": -1.86
+      "valor_actual": 5284.31,
+      "rendimiento_pct": -3.55,
+      "max_caida_pct": -3.55
+    },
+    {
+      "estrategia": "Apuesta de Jesús: Ethereum",
+      "valor_inicial": 5478.67,
+      "valor_actual": 5460.09,
+      "rendimiento_pct": -0.34,
+      "max_caida_pct": -0.34
     }
   ],
   "referencia": {
     "estrategia": "Comprar y mantener SPY (punto de referencia)",
     "valor_inicial": 5478.67,
-    "valor_actual": 5416.44,
-    "rendimiento_pct": -1.14,
-    "max_caida_pct": -1.42
+    "valor_actual": 5356.51,
+    "rendimiento_pct": -2.23,
+    "max_caida_pct": -2.23
   },
   "equity": [
     {
@@ -111,6 +118,31 @@
       "fecha": "2026-10-15",
       "estrategia": "Rotación mensual por momentum (SPY, QQQ, EFA, TLT, GLD)",
       "valor": 5381.1
+    },
+    {
+      "fecha": "2026-10-16",
+      "estrategia": "Comprar y mantener SPY (punto de referencia)",
+      "valor": 5356.51
+    },
+    {
+      "fecha": "2026-10-16",
+      "estrategia": "Cruce 50/200 sobre QQQ",
+      "valor": 5212.12
+    },
+    {
+      "fecha": "2026-10-16",
+      "estrategia": "Cruce 50/200 sobre SPY",
+      "valor": 5356.51
+    },
+    {
+      "fecha": "2026-10-16",
+      "estrategia": "Rotación mensual por momentum (SPY, QQQ, EFA, TLT, GLD)",
+      "valor": 5284.31
+    },
+    {
+      "fecha": "2026-10-16",
+      "estrategia": "Apuesta de Jesús: Ethereum",
+      "valor": 5460.09
     }
   ],
   "operaciones": [
@@ -158,6 +190,15 @@
       "titulos": 3.509012,
       "precio": 778.399,
       "comision": 7.9211
+    },
+    {
+      "fecha": "2026-10-16",
+      "estrategia": "Apuesta de Jesús: Ethereum",
+      "activo": "ETH-USD",
+      "accion": "compra",
+      "titulos": 2.26147,
+      "precio": 2415.6071,
+      "comision": 15.8422
     }
   ]
 }
